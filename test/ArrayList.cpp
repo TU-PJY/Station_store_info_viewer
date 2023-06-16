@@ -9,24 +9,13 @@
 
 using namespace std;
 
+//배열 라스트 생성
 ArrayList* createArrayList() {
     ArrayList* list = (ArrayList*)malloc(sizeof(ArrayList));
-    list->lines = NULL;
-    list->size = 0;
-    return list;
+    list->lines = NULL; list->size = 0; return list; 
 }
 
-void destroyArrayList(ArrayList* list) {
-    if (list == NULL)
-        return;
-
-    for (int i = 0; i < list->size; i++) {
-        free(list->lines[i]);
-    }
-    free(list->lines);
-    free(list);
-}
-
+//배열 리스트에 한 줄씩 읽은 텍스트 라인 추가
 void addLine(ArrayList* list, const char* line) {
     list->lines = (char**)realloc(list->lines, (list->size + 1) * sizeof(char*));
     list->lines[list->size] = (char*)malloc((strlen(line) + 1) * sizeof(char));
@@ -34,25 +23,24 @@ void addLine(ArrayList* list, const char* line) {
     list->size++;
 }
 
+//파일 읽기
 ArrayList* readFile(const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (file == NULL) {
-        printf("파일을 열 수 없습니다.\n");
-        return NULL;
-    }
-
     ArrayList* list = createArrayList();
     char buffer[MAX_LINE_LENGTH];
+
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("파일을 열 수 없습니다.\n"); return NULL; 
+    }
+    
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        // 개행 문자 제거
-        buffer[strcspn(buffer, "\n")] = '\0';
+        buffer[strcspn(buffer, "\n")] = '\0';  // 개행 문자 제거
         addLine(list, buffer);
     }
-
-    fclose(file);
-    return list;
+    fclose(file); return list; 
 }
 
+//데이터 분류 출력
 void printBorder() {
     cout.width(5); cout << "번호" << "| ";
     cout << " 노선" << "| ";
@@ -63,3 +51,16 @@ void printBorder() {
     cout.width(10); cout << "월 임대료" << "| ";
     cout << endl;
 }
+
+void printMenu() {
+    cout << "===============메뉴 선택===============" << endl;
+    cout << "1: 모든 데이터 보기" << endl;
+    cout << "2: 특정 노선 검색" << endl;
+    cout << "3: 특정 역 검색" << endl;
+    cout << "4: 특정 업종 검색" << endl;
+    cout << "5: 임대료 기준으로 검색" << endl;
+    cout << "6: 추천 데이터 검색" << endl;
+    cout << "c: 콘솔 창 텍스트 지우기" << endl;
+    cout << "=======================================" << endl;
+}
+

@@ -5,18 +5,28 @@
 #include <string.h>
 #include <iostream>
 #include "ArrayList.h"
-
 #define MAX_LINE_LENGTH 100
 
 using namespace std;
 
 string cmd; //명령어 입력받는 스트링
-string line_search;
+string line_search; //검색어가 올바른지 검사하는 스트링
+
+//데이터 출력 함수
+void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*list_place_number, ArrayList* list_place_type, ArrayList*list_m2, ArrayList* list_fee) {
+    cout.width(5); cout << i << "| ";
+    cout << list_line->lines[i] << "| ";
+    cout.width(25); cout << list_station->lines[i] << "| ";
+    cout.width(10); cout << list_place_number->lines[i] << "| ";
+    cout.width(15); cout << list_place_type->lines[i] << "| ";
+    cout.width(10); cout << list_m2->lines[i] << " m^2| ";
+    cout.width(10); cout << list_fee->lines[i] << " ￦| ";
+    cout << endl;
+}
 
 int main() {
     //특정한 데이터 출력시 사용하는 인덱스 저장 배열
     int data_index[1000] = { 0 };
-    int idx = -1;
 
     //상가 유형
     const char* place_type = "data_place_type.txt";
@@ -30,7 +40,7 @@ int main() {
     const char* m2 = "data_m2.txt";
     //월 임대료
     const char* fee = "data_fee.txt";
-    
+
     //파일 읽어서 저장
     ArrayList* list_place_type = readFile(place_type);
     ArrayList* list_line = readFile(line);
@@ -38,94 +48,113 @@ int main() {
     ArrayList* list_place_number = readFile(place_number);
     ArrayList* list_m2 = readFile(m2);
     ArrayList* list_fee = readFile(fee);
-   
 
     //하나라도 정상 로드가 되지 않을 경우 종료
-    if (list_place_type == NULL || line == NULL) {
-        printf("파일을 읽을 수 없습니다.\n");
-        return 1;
+    if (list_place_type -> size != list_line -> size && list_place_type -> size != list_station -> size) {
+        printf("|출력| 파일 불러오기를 할 수 없습니다.\n"); return 1; 
     }
     //모두 로드되면 프로그램 준비
-    else printf("파일을 불러오는데에 성공하였습니다.\n");
+    else printf("|출력| 파일 불러오기를 성공하였습니다.\n");
 
-    for (;;) {
-        printf("명령어 입력>> ");
+    while(1) {
+        printMenu(); printf("명령어 입력>> ");
         cin >> cmd;
+
+        //cmd = 1
         //모든 데이터 출력
-        if (cmd == "print-all") {
-            system("CLS");
-            printBorder();
-            for (int i = 0; i < list_place_type->size; i++) {
-                cout.width(5); cout << i << "| ";
-                cout << list_line->lines[i] << "| ";
-                cout.width(25); cout << list_station->lines[i] << "| ";
-                cout.width(10); cout << list_place_number->lines[i] << "| ";
-                cout.width(15); cout << list_place_type->lines[i] << "| ";
-                cout.width(10); cout << list_m2->lines[i] << " m^2| ";
-                cout.width(10); cout << list_fee->lines[i] << " ￦| ";
-                cout << endl;
-            }
-            printBorder();
-            cout << "데이터를 모두 출력하였습니다." << endl << endl;
+        if (cmd == "1") {
+            system("CLS"); printBorder();
+           
+            for (int i = 0; i < list_place_type->size; i++)
+                printData(i, list_line, list_station, list_place_number, list_place_type, list_m2, list_fee);
+            
+            printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다." << endl; 
         }
 
-        else if (cmd == "search-line") {
-            system("CLS");
-            idx = -1;
-            int error = 0;
-            char search_line[20] = { 0 };
-            cout << "어떤 노선을 검색 하시겠습니까?" << endl;
-            cout << ">> ";
+
+        //cmd = 2
+        //특정 노선 검색
+        else if (cmd == "2") {
+            //검색 전 초기 상태
+            system("CLS"); search = false; number_find = false;
+            
+            cout << "|출력| 어떤 노선을 검색 하시겠습니까?" << endl;
+            cout << "===============검색어 입력===============" << endl;
+            cout << "(예: '1', '2', '3') >> ";
             cin >> cmd;
 
-            for (int i = 0; i < list_place_type->size; i++) {
-                if (strstr(list_line->lines[i], cmd.c_str())) {
-                    cout.width(5); cout << i << "| ";
-                    cout << list_line->lines[i] << "| ";
-                    cout.width(25); cout << list_station->lines[i] << "| ";
-                    cout.width(10); cout << list_place_number->lines[i] << "| ";
-                    cout.width(15); cout << list_place_type->lines[i] << "| ";
-                    cout.width(10); cout << list_m2->lines[i] << " m^2| ";
-                    cout.width(10); cout << list_fee->lines[i] << " ￦| ";
-                    cout << endl;
-                    idx++; //데이터 존재 유무 판별용 변수, -1이면 존재하지 않음
+            //노선 검색 시 번호 포함 안하면 검색 불가
+            if (number_find == false) {
+                for (int i = 1; i < 9; i++) {
+                    //i를 itoa변환 후 ch가 받고 이를 스트링 변수가 받아서 c_str() 변환 과정을 거쳐 비교 할 수 있도록 만듬
+                    char ch[2] = { 0 }; string number = _itoa(i, ch, 10); 
+                    //서울교통공사는 1호선~8호선까지 운영하므로 반복문을 통해 해당 노선 번호가 cmd에 존재하는지 검사
+                    //있으면 true가 되어 출력부로 넘어감
+                    if (strstr(cmd.c_str(), number.c_str()) && strlen(cmd.c_str()) == 1) number_find = true;
+                } 
+                //없다면 그대로 false가 되어 출력 안 됨
+                if (number_find == false) {
+                    system("CLS"); cout << "|출력| 알 수 없는 검색어 입니다." << endl; 
                 }
             }
-
-            if (idx >= 0) {
+            
+            //만약 올바른 검색어라면 출력 시작
+            if (number_find == true) {
                 printBorder();
-                cout << "검색한 데이터를 모두 출력하였습니다." << endl;
-            }
-
-            else if (idx == -1)
-                cout << "그런 데이터가 없습니다." << endl;
-        }
-            /*
-            if (idx >= 0) {
-                printBorder();
-                for (int i = 0; i < idx; i++) {
-                    if (idx >= 0) {
-                        for (int i = 0; i < idx; i++) {
-                          
-                        }
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (strstr(list_line->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_m2, list_fee);
+                        search = true;
                     }
                 }
-                cout << "검색한 데이터를 모두 출력하였습니다." << endl;
+                if (search == true) {
+                    printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 노선 번호" << endl; 
+                }
+            }
+        }
+
+
+        //cmd = 3
+        //특정 역명 검색
+        else if (cmd == "3") {
+            //검색 전 초기 상태
+            system("CLS"); search = false;
+            
+            cout << "|출력| 어떤 역을 검색 하시겠습니까?" << endl;
+            cout << "===============검색어 입력===============" << endl;
+            cout << "(예: '동대문', '천호' 또는 '1', '2') >> ";
+            cin >> cmd;
+
+            //일단 검색
+            printBorder();
+            for (int i = 0; i < list_place_type->size; i++) {
+                if (strstr(list_station->lines[i], cmd.c_str())) {
+                    printData(i, list_line, list_station, list_place_number, list_place_type, list_m2, list_fee);
+                    search = true; //검색결과가 나오면 true
+                }
+            }
+            if (search == true) {
+                printBorder(); cout << endl << "|출력| 검색한 데이터를 보두 출력하였습니다. 검색 기준: 역명" << endl; 
             }
 
-            else if (idx == -1)
-                cout << "그런 데이터가 없습니다." << endl;
-                */
-     //   }
+            //검색결과가 나오지 않으면 그대로 false
+            else if (search == false) {
+                system("CLS"); cout << "|출력| 그런 데이터가 없습니다." << endl; 
+            }
+        }
 
+        //콘솔창 텍스트 지우기
+        else if (cmd == "c") {
+            system("CLS"); cout << "|출력| 텍스트를 모두 지웠습니다." << endl; 
+        }
+           
+        //정해진 커맨드 외의 커맨드
         else {
-            system("CLS");
-            printf("알 수 없는 명령어 입니다.\n");
+            system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl; 
         }
     }
         
 
-
-    destroyArrayList(list_place_type);
     return 0;
 }
+
