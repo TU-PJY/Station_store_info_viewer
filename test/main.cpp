@@ -13,7 +13,25 @@ string cmd; //명령어 입력받는 스트링
 string line_search; //검색어가 올바른지 검사하는 스트링
 
 //데이터 출력 함수
-void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*list_place_number, ArrayList* list_place_type, ArrayList* list_work_type, ArrayList*list_m2, ArrayList* list_fee) {
+void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*list_place_number, ArrayList* list_place_type, ArrayList* list_work_type, ArrayList*list_m2, ArrayList* list_fee) {   
+    //노선에 따라 색상이 다르게 출력
+    if(strstr(list_line->lines[i], "1호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+    else if(strstr(list_line->lines[i], "2호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    else if (strstr(list_line->lines[i], "3호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED);
+    else if (strstr(list_line->lines[i], "4호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    else if (strstr(list_line->lines[i], "5호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+    else if (strstr(list_line->lines[i], "6호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+    else if (strstr(list_line->lines[i], "7호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+    else if (strstr(list_line->lines[i], "8호선"))
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
+
     cout.width(5); cout << i << "| ";
     cout << list_line->lines[i] << "| ";
     cout.width(25); cout << list_station->lines[i] << "| ";
@@ -71,7 +89,8 @@ int main() {
            
             for (int i = 0; i < list_place_type->size; i++)
                 printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
-            
+
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
             printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다." << endl; 
         }
 
@@ -113,6 +132,7 @@ int main() {
                     }
                 }
                 if (search == true) {
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
                     printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 노선 번호" << endl; 
                 }
             }
@@ -140,9 +160,9 @@ int main() {
                 }
             }
             if (search == true) {
-                printBorder(); cout << endl << "|출력| 검색한 데이터를 보두 출력하였습니다. 검색 기준: 역명" << endl; 
-            }
-
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+                printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 역명" << endl; 
+            } 
             //검색결과가 나오지 않으면 그대로 false
             else if (search == false) {
                 system("CLS"); cout << "|출력| 그런 데이터가 없습니다." << endl; 
@@ -170,9 +190,9 @@ int main() {
                 }
             }
             if (search == true) {
-                printBorder(); cout << endl << "|출력| 검색한 데이터를 보두 출력하였습니다. 검색 기준: 업종" << endl;
-            }
-
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+                printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 업종" << endl;
+            } 
             //검색결과가 나오지 않으면 그대로 false
             else if (search == false) {
                 system("CLS"); cout << "|출력| 그런 데이터가 없습니다." << endl;
