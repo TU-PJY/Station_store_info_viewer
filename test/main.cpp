@@ -10,7 +10,8 @@ string cmd; //명령어 입력받는 스트링
 string line_search; //검색어가 올바른지 검사하는 스트링
 
 //데이터 출력 함수
-void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*list_place_number, ArrayList* list_place_type, ArrayList* list_work_type, ArrayList*list_m2, ArrayList* list_fee) {   
+void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*list_place_number, ArrayList* list_place_type, 
+                ArrayList* list_work_type, ArrayList*list_m2, ArrayList* list_fee, ArrayList * list_end_date) {   
     //노선에 따라 색상이 다르게 출력
     if(strstr(list_line->lines[i], "1호선"))
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_INTENSITY);
@@ -37,6 +38,7 @@ void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*l
     cout.width(10); cout << list_work_type->lines[i] << "| ";
     cout.width(10); cout << list_m2->lines[i] << " m^2| ";
     cout.width(10); cout << list_fee->lines[i] << " ￦| ";
+    cout.width(10); cout << list_end_date->lines[i] << " |";
     cout << endl;
 }
 
@@ -44,20 +46,22 @@ int main() {
     //특정한 데이터 출력시 사용하는 인덱스 저장 배열
     int data_index[1000] = { 0 };
 
-    //상가 유형
-    const char* place_type = "data_place_type.txt";
     //노선
     const char* line = "data_line.txt";
-    //상가 번호
-    const char* place_number = "data_place_number.txt";
     //역명
     const char* station = "data_station.txt";
+    //상가 번호
+    const char* place_number = "data_place_number.txt";
+    //상가 유형
+    const char* place_type = "data_place_type.txt";
     //상가 면적
     const char* m2 = "data_m2.txt";
     //월 임대료
     const char* fee = "data_fee.txt";
     //업종
     const char* work_type = "data_work_type.txt";
+    //계약 만기일
+    const char* end_date = "data_end_date.txt";
 
     //파일 읽어서 저장
     ArrayList* list_place_type = readFile(place_type);
@@ -67,6 +71,7 @@ int main() {
     ArrayList* list_m2 = readFile(m2);
     ArrayList* list_fee = readFile(fee);
     ArrayList* list_work_type = readFile(work_type);
+    ArrayList* list_end_date = readFile(end_date);
 
     //하나라도 정상 로드가 되지 않을 경우 종료
     if (list_place_type -> size != list_line -> size && list_place_type -> size != list_station -> size) {
@@ -90,7 +95,7 @@ int main() {
             system("CLS"); printBorder();
            
             for (int i = 0; i < list_place_type->size; i++)
-                printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
+                printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
 
             SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
             printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다." << endl; 
@@ -129,7 +134,7 @@ int main() {
                 printBorder();
                 for (int i = 0; i < list_place_type->size; i++) {
                     if (strstr(list_line->lines[i], cmd.c_str())) {
-                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
                         search = true;
                     }
                 }
@@ -157,7 +162,7 @@ int main() {
             printBorder();
             for (int i = 0; i < list_place_type->size; i++) {
                 if (strstr(list_station->lines[i], cmd.c_str())) {
-                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
+                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
                     search = true; //검색결과가 나오면 true
                 }
             }
@@ -184,10 +189,9 @@ int main() {
 
             cout << endl;
             printBorder();
-            
             for (int i = 0; i < list_place_type->size; i++) {
                 if (strstr(list_work_type->lines[i], cmd.c_str())) {
-                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
+                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
                     search = true; //검색결과가 나오면 true
                 }
             }
@@ -211,20 +215,20 @@ int main() {
             cout << "(숫자만 입력, 예: 1120000, 340000) >> ";
             cin >> cmd;
 
+            //입력한 커맨드가 숫자인지 아닌지 검색, 숫자 이외의 다른 문자가 껴 있을 경우 숫자로 판정 안되어 검색 진행 하지 않음
             for (int i = 0; i < cmd.length(); i++) {
-                if (isdigit(cmd[i]) == 0)
-                    is_number = false;
+                if (isdigit(cmd[i]) == 0) is_number = false; 
             }
 
             if (is_number == true) {
+                cout << endl;
                 printBorder();
                 for (int i = 0; i < list_place_type->size; i++) {
                     if (atoi(list_fee->lines[i]) < atoi(cmd.c_str()) && atoi(list_fee->lines[i]) > 0) {
-                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
                         search = true; //검색결과가 나오면 true
                     }
                 }
-
                 if (search == true) {
                     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                     printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 임대료" << endl;
@@ -233,7 +237,6 @@ int main() {
                     system("CLS"); cout << "|출력| 해당 상한선 내의 임대료 데이터를 찾을 수 없습니다." << endl;
                 }
             }
-            
             else if (is_number == false) {
                 system("CLS"); cout << "|출력| 올바른 숫자가 아닙니다." << endl;
             }
