@@ -6,8 +6,13 @@ typedef struct {
     int size;
 } ArrayList;
 
+//추천 데이터 검색 시 사용하는 열거형 변수
+enum state {
+    input, check, output
+};
+
 static bool search = false;  //데이터 존재 유무 판별용 변수, 한 개라도 검색되지 않으면 true가 되지 않아 오류 출력
-static bool number_find = false; //노선 검색 시 검색어가 올바르면 true, 올바르지 않으면 false
+static int state = input;
 
 //함수
 ArrayList* createArrayList();
