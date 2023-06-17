@@ -1,8 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <iostream>
 #include "ArrayList.h"
 #define MAX_LINE_LENGTH 100
@@ -20,13 +17,13 @@ void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*l
     else if(strstr(list_line->lines[i], "2호선"))
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     else if (strstr(list_line->lines[i], "3호선"))
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
     else if (strstr(list_line->lines[i], "4호선"))
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     else if (strstr(list_line->lines[i], "5호선"))
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
     else if (strstr(list_line->lines[i], "6호선"))
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED);
     else if (strstr(list_line->lines[i], "7호선"))
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
     else if (strstr(list_line->lines[i], "8호선"))
@@ -79,6 +76,11 @@ int main() {
     else printf("|출력| 파일 불러오기를 성공하였습니다.\n");
 
     while(1) {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+        cout << "=======================================" << endl;
+        cout << "서울교통공사 상가 데이터 검색 프로그램" << endl;
+        cout << "데이터 기준: 2023.04.30" << endl;
+        cout << "=======================================" << endl;
         printMenu(); printf("명령어 입력>> ");
         cin >> cmd;
 
@@ -90,7 +92,7 @@ int main() {
             for (int i = 0; i < list_place_type->size; i++)
                 printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
 
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
             printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다." << endl; 
         }
 
@@ -132,7 +134,7 @@ int main() {
                     }
                 }
                 if (search == true) {
-                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                     printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 노선 번호" << endl; 
                 }
             }
@@ -160,7 +162,7 @@ int main() {
                 }
             }
             if (search == true) {
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                 printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 역명" << endl; 
             } 
             //검색결과가 나오지 않으면 그대로 false
@@ -190,7 +192,7 @@ int main() {
                 }
             }
             if (search == true) {
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                 printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 업종" << endl;
             } 
             //검색결과가 나오지 않으면 그대로 false
@@ -199,22 +201,53 @@ int main() {
             }
         }
 
+        //cmd = 5
+        //임대료 기준 검색
+        else if (cmd == "5") {
+            system("CLS");  search = false; bool is_number = true;
 
-        //cmd = c
-        //콘솔창 텍스트 지우기
-        else if (cmd == "c") {
-            system("CLS"); cout << "|출력| 텍스트를 모두 지웠습니다." << endl; 
+            cout << "|출력| 임대료 상한선을 입력해주세요." << endl;
+            cout << "===============검색어 입력===============" << endl;
+            cout << "(숫자만 입력, 예: 1120000, 340000) >> ";
+            cin >> cmd;
+
+            for (int i = 0; i < cmd.length(); i++) {
+                if (isdigit(cmd[i]) == 0)
+                    is_number = false;
+            }
+
+            if (is_number == true) {
+                printBorder();
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[i]) < atoi(cmd.c_str()) && atoi(list_fee->lines[i]) > 0) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee);
+                        search = true; //검색결과가 나오면 true
+                    }
+                }
+
+                if (search == true) {
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                    printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 임대료" << endl;
+                }
+                else if (search == false) {
+                    system("CLS"); cout << "|출력| 해당 상한선 내의 임대료 데이터를 찾을 수 없습니다." << endl;
+                }
+            }
+            
+            else if (is_number == false) {
+                system("CLS"); cout << "|출력| 올바른 숫자가 아닙니다." << endl;
+            }
         }
 
-        //cmd = e
+        //cmd = q
         //프로그램 종료하기
         else if (cmd == "q") {
             cout << "프로그램을 종료합니다." << endl; break; 
         }
            
-        //정해진 커맨드 외의 커맨드
+        //정해진 커맨드 외의 커맨드, 텍스트 지우기
         else {
-            system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl; 
+            system("CLS"); cout << "|출력| 텍스트를 모두 지웠습니다." << endl; 
         }
     }
 

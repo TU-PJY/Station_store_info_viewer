@@ -1,8 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <windows.h>
 #include <iostream>
+#include "ArrayList.h"
 #include "ArrayList.h"
 
 #define MAX_LINE_LENGTH 100
@@ -63,8 +62,8 @@ void printMenu() {
     cout << "4: 업종 기준 검색" << endl;
     cout << "5: 임대료 기준 검색" << endl;
     cout << "6: 추천 데이터 검색" << endl;
-    cout << "c: 콘솔 창 텍스트 지우기" << endl;
-    cout << "q: 프로그램 종료" << endl;
+    cout << "q: 프로그램 종료" << endl << endl;
+    cout << "텍스트를 지우려면 메뉴에 없는 키 입력" << endl;
     cout << "=======================================" << endl;
 }
 
