@@ -363,14 +363,11 @@ int main() {
                     break;
 
                 case up: //오름차순
-                    if (atoi(cmd.c_str()) != cmd_temp) { //한 번 오름차순 되면 동일한 값에 대하여 다음 오름차순 출력 시에는 정렬 진행하지 않음
-                        mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, list_place_type->size - 1, up);
-                        //옵션 기록을 위한 정렬 상태 변경
-                        is_upsorted = true;
-                        is_downsorted = false;
-                        cmd_temp = atoi(cmd.c_str());
-                    }
-
+                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, list_place_type->size - 1, up);
+                    //옵션 기록을 위한 정렬 상태 변경
+                    is_upsorted = true;
+                    is_downsorted = false;
+                    
                     for (int i = 0; i < list_place_type->size; i++) {
                         if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {
                             printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
@@ -382,13 +379,10 @@ int main() {
 
 
                 case down: //내림차순
-                    if (atoi(cmd.c_str()) != cmd_temp) { //내림차순도 마찬가지로 같은 값에 대해 내림차순 정렬을 진행하지 않는다.
-                        mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, list_place_type->size - 1, down);
-                        //옵션 기록을 위한 정렬 상태 변경
-                        is_downsorted = true;
-                        is_upsorted = false;
-                        cmd_temp = atoi(cmd.c_str());
-                    }
+                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, list_place_type->size - 1, down);
+                    //옵션 기록을 위한 정렬 상태 변경
+                    is_downsorted = true;
+                    is_upsorted = false;
 
                     for (int i = 0; i < list_place_type->size; i++) {
                         if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {

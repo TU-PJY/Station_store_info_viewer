@@ -26,7 +26,6 @@ static int mem_index[3000] = { 0 };
 
 static bool is_upsorted = false;
 static bool is_downsorted = false;
-static int cmd_temp;
 
 
 //ÇÔ¼ö
