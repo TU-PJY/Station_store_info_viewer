@@ -60,8 +60,6 @@ int main() {
     }
 
     while(1) {
-        is_escape = false; 
-
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
         cout << "=======================================" << endl;
         cout << "서울교통공사 상가 데이터 검색 프로그램" << endl;
@@ -511,6 +509,7 @@ int main() {
                     if (search == true) {
                         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                         printBorder();  cout << endl << "|출력| 데이터를 기반으로 추천드리는 상가는 위와 같습니다." << endl;
+                        cout << "|검색 필터| 노선: " << mem_line << "호선 | " << "역명: " << mem_station << " | " << "임대료 상한선: " << mem_fee << "￦" << endl;
 
                         current_state = input; is_escape = true; break;
                     }
