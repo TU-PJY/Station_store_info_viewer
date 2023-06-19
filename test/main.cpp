@@ -86,6 +86,7 @@ void merge(char* arr[], int l, int m, int r, int index[], int index_l, int index
             index[k] = left_index[i];
             i++;
         }
+
         else {
             arr[k] = right_arr[j];
             index[k] = right_index[j];
@@ -353,33 +354,11 @@ int main() {
                     break;
 
                 case up: //오름차순
-                    /*
-                    for (int i = 0; i < sorted_list_fee->size - 1; i++) {
-                        int min_idx = i;
-                        for (int j = i + 1; j < sorted_list_fee->size; ++j) {
-                            if (atoi(sorted_list_fee->lines[j]) < atoi(sorted_list_fee->lines[min_idx]))
-                                min_idx = j;
-                        }
-                        // 값을 교환하는 대신 인덱스 순서를 교환
-                        //sorted_list_fee를 기준으로 인덱스 순서를 교환하기 때문에 sorted_list_fee를 같이 정렬하지 않으면 인덱스가 제대로 정렬이 되지 않음
-                        std::swap(sorted_list_fee->lines[i], sorted_list_fee->lines[min_idx]);
-                        std::swap(mem_index[i], mem_index[min_idx]);
-                    }
+                    //데이터 위치 교환 없이 인덱스 순서만 교환함
+                    //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, sorted_list_fee->size - 1, up);
                     is_upsorted = true;
                     is_downsorted = false;
-
-                    for (int i = 0; i < list_place_type->size; i++) {
-                        if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {
-                            printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
-                            search = true; //검색결과가 나오면 true
-                        }
-                    }
-                    */
-
-                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, sorted_list_fee->size - 1, down);
-                    is_upsorted = true;
-                    is_downsorted = false;
-
 
                     for (int i = 0; i < list_place_type->size; i++) {
                         if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {
@@ -391,16 +370,7 @@ int main() {
 
 
                 case down: //내림차순
-                    for (int i = 0; i < sorted_list_fee->size - 1; i++) {
-                        int max_idx = i;
-                        for (int j = i + 1; j < sorted_list_fee->size; ++j) {
-                            if (atoi(sorted_list_fee->lines[j]) > atoi(sorted_list_fee->lines[max_idx]))
-                                max_idx = j;
-                        }
-                        // 값을 교환하는 대신 인덱스 순서를 교환
-                        std::swap(sorted_list_fee->lines[i], sorted_list_fee->lines[max_idx]);
-                        std::swap(mem_index[i], mem_index[max_idx]);
-                    }
+                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, sorted_list_fee->size - 1, down);
                     is_downsorted = true;
                     is_upsorted = false;
 
