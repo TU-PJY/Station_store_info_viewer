@@ -137,6 +137,40 @@ void mergeSort(char* arr[], int l, int r, int index[], int index_l, int index_r,
     }
 }
 
+//데이터 출력 함수
+void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList* list_place_number, ArrayList* list_place_type,
+    ArrayList* list_work_type, ArrayList* list_m2, ArrayList* list_fee, ArrayList* list_end_date, bool color_out) {
+    //노선에 따라 색상이 다르게 출력
+    if (color_out == true) { //color_out이 true일 때만 색상 출력
+        if (strstr(list_line->lines[i], "1호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+        else if (strstr(list_line->lines[i], "2호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+        else if (strstr(list_line->lines[i], "3호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+        else if (strstr(list_line->lines[i], "4호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+        else if (strstr(list_line->lines[i], "5호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+        else if (strstr(list_line->lines[i], "6호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_RED);
+        else if (strstr(list_line->lines[i], "7호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+        else if (strstr(list_line->lines[i], "8호선"))
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
+    }
+
+    cout.width(5); cout << i << "| ";
+    cout << list_line->lines[i] << "| ";
+    cout.width(25); cout << list_station->lines[i] << "| ";
+    cout.width(10); cout << list_place_number->lines[i] << "| ";
+    cout.width(15); cout << list_place_type->lines[i] << "| ";
+    cout.width(10); cout << list_work_type->lines[i] << "| ";
+    cout.width(10); cout << list_m2->lines[i] << " m^2| ";
+    cout.width(10); cout << list_fee->lines[i] << " ￦| ";
+    cout.width(10); cout << list_end_date->lines[i] << " |";
+    cout << endl;
+}
 
 //데이터 분류 출력
 void printBorder() {
