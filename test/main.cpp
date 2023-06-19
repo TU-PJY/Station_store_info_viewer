@@ -10,8 +10,6 @@ string cmd; //명령어 입력받는 스트링
 string option; //옵션 입력받는 스트링
 string mem_line, mem_station, mem_fee; //추천 데이터 검색 시 사용하는 스트링
 
-
-
 int main() {
     //노선
     const char* line = "data_line.txt";
@@ -94,7 +92,7 @@ int main() {
                     print_option = without0; end_for = true;
                     break;
 
-                case 2:
+                case 2: //면적 표시된 데이터만 검색
                     print_option = without0_width; end_for = true;
                     break;
 
