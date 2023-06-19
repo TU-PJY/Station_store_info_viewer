@@ -46,92 +46,6 @@ void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*l
     cout << endl;
 }
 
-// 머지 소트
-void merge(char* arr[], int l, int m, int r, int index[], int index_l, int index_m, int index_r, int state) {
-    int n1 = m - l + 1; // 왼쪽 부분 배열의 크기
-    int n2 = r - m; // 오른쪽 부분 배열의 크기
-
-    // 임시 배열 생성 및 복사
-    char** left_arr = new char* [n1];
-    char** right_arr = new char* [n2];
-    int* left_index = new int[n1];
-    int* right_index = new int[n2];
-
-    for (int i = 0; i < n1; i++) {
-        left_arr[i] = arr[l + i];
-        left_index[i] = index[index_l + i];
-    }
-
-    for (int j = 0; j < n2; j++) {
-        right_arr[j] = arr[m + 1 + j];
-        right_index[j] = index[index_m + 1 + j];
-    }
-
-    // 임시 배열을 사용하여 병합
-    int i = 0; // 왼쪽 부분 배열의 인덱스
-    int j = 0; // 오른쪽 부분 배열의 인덱스
-    int k = l; // 병합된 배열의 인덱스
-
-    while (i < n1 && j < n2) {
-        //오름차순
-        if (strcmp(left_arr[i], right_arr[j]) <= 0 && state == up) {
-            arr[k] = left_arr[i];
-            index[k] = left_index[i];
-            i++;
-        }
-
-        //내림차순
-        else  if (strcmp(left_arr[i], right_arr[j]) >= 0 && state == down) {
-            arr[k] = left_arr[i];
-            index[k] = left_index[i];
-            i++;
-        }
-
-        else {
-            arr[k] = right_arr[j];
-            index[k] = right_index[j];
-            j++;
-        }
-        k++;
-    }
-
-    // 남은 요소들을 복사
-    while (i < n1) {
-        arr[k] = left_arr[i];
-        index[k] = left_index[i];
-        i++;
-        k++;
-    }
-
-    while (j < n2) {
-        arr[k] = right_arr[j];
-        index[k] = right_index[j];
-        j++;
-        k++;
-    }
-
-    // 동적 할당한 메모리 해제
-    delete[] left_arr;
-    delete[] right_arr;
-    delete[] left_index;
-    delete[] right_index;
-}
-
-// 머지 소트
-void mergeSort(char* arr[], int l, int r, int index[], int index_l, int index_r, int state) {
-    if (l < r) {
-        int m = l + (r - l) / 2; // 중간 지점
-
-        // 왼쪽과 오른쪽 부분 배열을 재귀적으로 정렬
-        mergeSort(arr, l, m, index, index_l, index_l + (m - l), state);
-        mergeSort(arr, m + 1, r, index, index_l + (m - l) + 1, index_r, state);
-
-        // 정렬된 부분 배열을 병합
-        merge(arr, l, m, r, index, index_l, index_l + (m - l), index_r, state);
-    }
-}
-
-
 int main() {
     //노선
     const char* line = "data_line.txt";
@@ -355,24 +269,40 @@ int main() {
                     break;
 
                 case up: //오름차순
-                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, list_place_type->size - 1, up);
-                    //옵션 기록을 위한 정렬 상태 변경
+                    for (int i = 0; i < sorted_list_fee->size - 1; i++) {
+                        int min_idx = i;
+                        for (int j = i + 1; j < sorted_list_fee->size; ++j) {
+                            if (atoi(sorted_list_fee->lines[j]) < atoi(sorted_list_fee->lines[min_idx]))
+                                min_idx = j;
+                        }
+                        // 값을 교환하는 대신 인덱스 순서를 교환
+                        //sorted_list_fee를 기준으로 인덱스 순서를 교환하기 때문에 sorted_list_fee를 같이 정렬하지 않으면 인덱스가 제대로 정렬이 되지 않음
+                        std::swap(sorted_list_fee->lines[i], sorted_list_fee->lines[min_idx]);
+                        std::swap(mem_index[i], mem_index[min_idx]);
+                    }
                     is_upsorted = true;
                     is_downsorted = false;
-                    
+
                     for (int i = 0; i < list_place_type->size; i++) {
                         if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {
                             printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
-                            //cout << mem_index[i] << endl;
                             search = true; //검색결과가 나오면 true
-                       }
+                        }
                     }
                     break;
 
 
                 case down: //내림차순
-                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, list_place_type->size - 1, down);
-                    //옵션 기록을 위한 정렬 상태 변경
+                    for (int i = 0; i < sorted_list_fee->size - 1; i++) {
+                        int max_idx = i;
+                        for (int j = i + 1; j < sorted_list_fee->size; ++j) {
+                            if (atoi(sorted_list_fee->lines[j]) > atoi(sorted_list_fee->lines[max_idx]))
+                                max_idx = j;
+                        }
+                        // 값을 교환하는 대신 인덱스 순서를 교환
+                        std::swap(sorted_list_fee->lines[i], sorted_list_fee->lines[max_idx]);
+                        std::swap(mem_index[i], mem_index[max_idx]);
+                    }
                     is_downsorted = true;
                     is_upsorted = false;
 
