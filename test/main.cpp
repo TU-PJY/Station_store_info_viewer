@@ -46,91 +46,6 @@ void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*l
     cout << endl;
 }
 
-// 머지 소트
-void merge(char* arr[], int l, int m, int r, int index[], int index_l, int index_m, int index_r, int state) {
-    int n1 = m - l + 1; // 왼쪽 부분 배열의 크기
-    int n2 = r - m; // 오른쪽 부분 배열의 크기
-
-    // 임시 배열 생성 및 복사
-    char** left_arr = new char* [n1];
-    char** right_arr = new char* [n2];
-    int* left_index = new int[n1];
-    int* right_index = new int[n2];
-
-    for (int i = 0; i < n1; i++) {
-        left_arr[i] = arr[l + i];
-        left_index[i] = index[index_l + i];
-    }
-
-    for (int j = 0; j < n2; j++) {
-        right_arr[j] = arr[m + 1 + j];
-        right_index[j] = index[index_m + 1 + j];
-    }
-
-    // 임시 배열을 사용하여 병합
-    int i = 0; // 왼쪽 부분 배열의 인덱스
-    int j = 0; // 오른쪽 부분 배열의 인덱스
-    int k = l; // 병합된 배열의 인덱스
-
-    while (i < n1 && j < n2) {
-        // 숫자 문자열을 비교하여 정렬
-        //오름차순
-        if (atoi(left_arr[i]) <= atoi(right_arr[j]) && state == up) {
-            arr[k] = left_arr[i];
-            index[k] = left_index[i];
-            i++;
-        }
-        //내림차순
-        else if (atoi(left_arr[i]) >= atoi(right_arr[j]) && state == down) {
-            arr[k] = left_arr[i];
-            index[k] = left_index[i];
-            i++;
-        }
-
-        else {
-            arr[k] = right_arr[j];
-            index[k] = right_index[j];
-            j++;
-        }
-        k++;
-    }
-
-    // 남은 요소들을 복사
-    while (i < n1) {
-        arr[k] = left_arr[i];
-        index[k] = left_index[i];
-        i++;
-        k++;
-    }
-
-    while (j < n2) {
-        arr[k] = right_arr[j];
-        index[k] = right_index[j];
-        j++;
-        k++;
-    }
-
-    // 동적 할당한 메모리 해제
-    delete[] left_arr;
-    delete[] right_arr;
-    delete[] left_index;
-    delete[] right_index;
-}
-
-// 머지 소트
-void mergeSort(char* arr[], int l, int r, int index[], int index_l, int index_r, int state) {
-    if (l < r) {
-        int m = l + (r - l) / 2; // 중간 지점
-
-        // 왼쪽과 오른쪽 부분 배열을 재귀적으로 정렬
-        mergeSort(arr, l, m, index, index_l, index_l + (m - l), state);
-        mergeSort(arr, m + 1, r, index, index_l + (m - l) + 1, index_r, state);
-
-        // 정렬된 부분 배열을 병합
-        merge(arr, l, m, r, index, index_l, index_l + (m - l), index_r, state);
-    }
-}
-
 int main() {
     //노선
     const char* line = "data_line.txt";
@@ -151,6 +66,7 @@ int main() {
 
     //정렬 출력용 파일
     const char* sorted_fee = "data_fee.txt";
+    const char* sorted_m2 = "data_m2.txt";
 
     //파일 읽어서 저장
     ArrayList* list_place_type = readFile(place_type);
@@ -164,6 +80,7 @@ int main() {
 
     //인덱스 순서를 바꾸기 위해 사용하는 별도의 리스트
     ArrayList* sorted_list_fee = readFile(sorted_fee);
+    ArrayList* sorted_list_m2 = readFile(sorted_m2);
 
     //하나라도 정상 로드가 되지 않을 경우 종료
     if (list_place_type -> size != list_line -> size && list_place_type -> size != list_station -> size) {
@@ -177,7 +94,7 @@ int main() {
         mem_index[i] = i;
 
     while(1) {
-        is_escape = false;
+        is_escape = false; 
 
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
         cout << "=======================================" << endl;
@@ -189,13 +106,133 @@ int main() {
 
         switch (atoi(cmd.c_str())) {
         case 1: //cmd = 1  모든 데이터 출력
+            system("CLS"); end_for = false;
+            for (;;) {
+                if (end_for == true) break;
+                cout << "===============검색 옵션===============" << endl;
+                cout << "1: 임대료 표시된 데이터만 검색" << endl;
+                cout << "2: 면적 표시된 데이터만 검색" << endl;
+                cout << "3: 면적 낮은 순(2번 옵션 자동 활성화)" << endl;
+                cout << "4: 낮은 가격 순(1번 옵션 자동 활성화)" << endl;
+                cout << "5: 면적 높은 순(2번 옵션 자동 활성화)" << endl;
+                cout << "6: 높은 가격 순(1번 옵션 자동 활성화)" << endl;
+                cout << "7: 옵션 선택 안 함" << endl;
+                cout << "=======================================" << endl;
+                cout << "옵션 >> ";
+                cin >> option;
+
+                switch (atoi(option.c_str())) {
+                case 1: //임대료 표시된 데이터만 검색
+                    print_option = without0; end_for = true;
+                    break;
+
+                case 2:
+                    print_option = without0_width; end_for = true;
+                    break;
+
+                case 3: //면적 오름차순
+                    print_option = up_width; end_for = true;
+                    break;
+
+                case 4: //임대료 오름차순
+                    print_option = up_price; end_for = true;
+                    break;
+
+                case 5: //면적 내림차순
+                    print_option = down_width; end_for = true;
+                    break;
+
+                case 6: //임대료 내림차순
+                    print_option = down_price; end_for = true;
+                    break;
+
+                case 7: //선택 안 함
+                    print_option = none_set;  end_for = true;
+                    break;
+
+
+                default:
+                    system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
+                    break;
+                }
+            }
+
             system("CLS"); printBorder();
 
-            for (int i = 0; i < list_place_type->size; i++)
-                printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+            switch (print_option) {
+            case none_set: //옵션 없음
+                for (int i = 0; i < list_place_type->size; i++)
+                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                break;
+
+
+            case up_width: //면적 오름차순
+                mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index, 0, sorted_list_m2->size - 1, up_width);
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[mem_index[i]]) > 0)
+                        printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                }
+                break;
+
+
+            case up_price: //임대료 오름차순
+                //데이터 위치 교환 없이 인덱스 순서만 교환함
+                //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, sorted_list_fee->size - 1, up_price);
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[mem_index[i]]) > 0)
+                        printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                }
+                break;
+
+
+            case down_width: //면적 내림차순
+                mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index, 0, sorted_list_m2->size - 1, down_width);
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[mem_index[i]]) > 0)
+                        printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                }
+                break;
+
+
+            case down_price: //임대료 내림차순
+                mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index, 0, sorted_list_fee->size - 1, down_price);
+                is_downsorted = true;
+                is_upsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[mem_index[i]]) > 0)
+                        printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                }
+                break;
+
+            case without0: //임대료 표시 안 된 데이터 제외
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[i]) > 0)
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                }
+                break;
+
+
+            case without0_width: //면적 표시 안 된 데이터 제외
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[i]) > 0)
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                }
+                break;
+            }
 
             SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-            printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다." << endl;
+            printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다. 검색 옵션: " << cmd << endl;
             break;
 
 
@@ -318,6 +355,7 @@ int main() {
                     cout << "2: 가격 낮은 순" << endl;
                     cout << "3: 옵션 선택 안 함" << endl;
                     cout << "=======================================" << endl;
+                    cout << "옵션 >> ";
                     cin >> option;
                     
                     switch(atoi(option.c_str())) {

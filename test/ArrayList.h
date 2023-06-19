@@ -15,6 +15,10 @@ enum option_set {
     up, down, none
 };
 
+enum option_all {
+    none_set , without0, without0_width, up_width, up_price, down_width, down_price
+};
+
 static bool search = false;  //데이터 존재 유무 판별용 변수, 한 개라도 검색되지 않으면 true가 되지 않아 오류 출력
 static int current_state = input;    //추천 데이터 검색 시 사용하는 변수, 각 상태에 따라 표시되는 텍스트와 기능이 다름
 static bool color_out = true; //이 변수가 true일 때 데이터 출력 시 색상 출력
@@ -32,5 +36,7 @@ static bool is_downsorted = false;
 ArrayList* createArrayList();
 void addLine(ArrayList* list, const char* line);
 ArrayList* readFile(const char* filename);
+void merge(char* arr[], int l, int m, int r, int index[], int index_l, int index_m, int index_r, int state);
+void mergeSort(char* arr[], int l, int r, int index[], int index_l, int index_r, int state);
 void printBorder();
 void printMenu();
