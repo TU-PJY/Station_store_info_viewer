@@ -46,6 +46,9 @@ int main() {
     ArrayList* sorted_list_fee = readFile(sorted_fee);
     ArrayList* sorted_list_m2 = readFile(sorted_m2);
 
+    clock_t start, finish;
+    double duration;
+
     //하나라도 정상 로드가 되지 않을 경우 종료
     if (list_place_type -> size != list_line -> size && list_place_type -> size != list_station -> size) {
         printf("|출력| 파일 불러오기를 할 수 없습니다.\n"); return 1; 
@@ -130,7 +133,9 @@ int main() {
 
 
             case up_width: //면적 오름차순
+                start = clock();
                 mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, up_width);
+                finish = clock();
                 is_upsorted = true;
                 is_downsorted = false;
 
@@ -142,7 +147,9 @@ int main() {
 
 
             case down_width: //면적 내림차순
+                start = clock();
                 mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, down_width);
+                finish = clock();
                 is_upsorted = true;
                 is_downsorted = false;
 
@@ -156,7 +163,9 @@ int main() {
             case up_price: //임대료 오름차순
                 //데이터 위치 교환 없이 인덱스 순서만 교환함
                 //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                start = clock();
                 mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, up_price);
+                finish = clock();
                 is_upsorted = true;
                 is_downsorted = false;
 
@@ -168,7 +177,9 @@ int main() {
 
 
             case down_price: //임대료 내림차순
+                start = clock();
                 mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, down_price);
+                finish = clock();
                 is_downsorted = true;
                 is_upsorted = false;
 
@@ -196,7 +207,20 @@ int main() {
             }
 
             SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-            printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다. 검색 옵션: " << option << endl;
+            printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다. 검색 옵션: ";
+            if (print_option == without0) cout << "임대료 표시된 데이터만" << endl;
+            else if (print_option == without0_width) cout << "면적 표시된 데이터만" << endl;
+            else if (print_option == up_width) cout << "면적 낮은 순" << endl;
+            else if (print_option == down_width) cout << "면적 높은 순" << endl;
+            else if (print_option == up_price) cout << "낮은 가격 순" << endl;
+            else if (print_option == down_price) cout << "높은 가격 순" << endl;
+            else if (print_option == none_set) cout << "선택 안 함" << endl;
+
+            if (print_option != without0 && print_option != without0_width) {
+                duration = (double)(finish - start) / CLOCKS_PER_SEC;
+                cout << "|처리 시간| " << duration << "ms" << endl;
+            }
+
             break;
 
 
@@ -358,7 +382,9 @@ int main() {
                 case up: //오름차순
                     //데이터 위치 교환 없이 인덱스 순서만 교환함
                     //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                    start = clock();
                     mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, up);
+                    finish = clock();
                     is_upsorted = true;
                     is_downsorted = false;
 
@@ -372,7 +398,9 @@ int main() {
 
 
                 case down: //내림차순
+                    start = clock();
                     mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, down);
+                    finish = clock();
                     is_downsorted = true;
                     is_upsorted = false;
 
@@ -388,9 +416,13 @@ int main() {
                 if (search == true) {
                     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                     printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 임대료| 상한선: " << cmd << "￦| "; 
+
                     if (is_upsorted == true) cout << "옵션: 낮은 가격 순" << endl;
                     else if (is_downsorted == true) cout << "옵션: 높은 가격 순" << endl;
                     else cout << "옵션: 선택 안 함" << endl;
+
+                    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+                    cout << "|처리 시간| " << duration << "ms" << endl;
                 }
                 else if (search == false) {
                     system("CLS"); cout << "|출력| 해당 상한선 내의 임대료 데이터를 찾을 수 없습니다." << endl;
@@ -401,7 +433,7 @@ int main() {
             }
             break;
 
-        case 6: //cmd = 7  추천 데이터 검색
+        case 6: //cmd = 6  추천 데이터 검색
             system("CLS"); 
             is_number = true; is_escape = false;
            
@@ -410,8 +442,51 @@ int main() {
                 end_for = false;
                 
                 switch (current_state) {
-                case input: //입력 단계
+                case input:
+                    if (line_op == true) {
+                        for (;;) {
+                            cout << "|출력| 노선을 입력해 주세요." << endl;
+                            cout << "===============필터 입력===============" << endl;
+                            cout << "(예: '1', '2', '3') >> ";
+
+                            cin >> mem_line;
+
+                            for (int i = 0; i < mem_line.length(); i++) {
+                                if (isdigit(mem_line[i]) == 0) is_number = false;
+                            }
+                            if (is_number == true) {
+                                line_op = false;
+                                break;
+                            }
+                            else if (is_number == false) {
+                                system("CLS"); cout << "|출력| 올바르지 않은 검색어입니다." << endl;
+                                is_number = true;
+                            }
+                        }
+                    }
+
+                    system("CLS");
+
+                    if (station_op == true) {
+                        for (;;) {
+                            cout << "|출력| 역명을 입력해 주세요." << endl;
+                            cout << "===============필터 입력===============" << endl;
+                            cout << "(예: '동대문', '천호' 또는 '1', '2') >> ";
+
+                            cin >> mem_station;
+                            station_op = false;
+                            break;
+                        }
+                    }
+
+                    system("CLS");
+
                     for (;;) {
+
+                    }
+
+                    
+                   for (;;) {
                         cout << "|출력| 노선을 입력해 주세요." << endl;
                         cout << "===============필터 입력===============" << endl;
                         cout << "(예: '1', '2', '3') >> ";
@@ -459,8 +534,7 @@ int main() {
                     system("CLS");
                     current_state = check;
                     break;
-
-
+                    
                 case check: //확인 단계
                     for (;;) {
                         if (end_for == true) break;

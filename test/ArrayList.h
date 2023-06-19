@@ -6,6 +6,7 @@ typedef struct {
     int size;
 } ArrayList;
 
+
 //추천 데이터 검색 시 사용하는 열거자
 enum state {
     input, check, output
@@ -30,6 +31,8 @@ static int mem_index_m2[2000]; //sorted_list_m2의 인덱스 순서를 저장하는 배열, �
 
 static bool is_upsorted = false; //오름차순, 내림차순 정렬 여부
 static bool is_downsorted = false;
+
+static bool line_op, station_op, type_op, fee_op, m2_op, work_op;
 
 //함수
 ArrayList* createArrayList();
