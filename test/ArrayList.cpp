@@ -29,7 +29,7 @@ ArrayList* readFile(const char* filename) {
 
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
-        printf("파일을 열 수 없습니다.\n"); return NULL; 
+        cout << "파일을 열 수 없습니다." << endl; return NULL;
     }
     
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
@@ -38,6 +38,7 @@ ArrayList* readFile(const char* filename) {
     }
     fclose(file); return list; 
 }
+
 
 //데이터 분류 출력
 void printBorder() {

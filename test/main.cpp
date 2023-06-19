@@ -7,7 +7,9 @@
 using namespace std;
 
 string cmd; //명령어 입력받는 스트링
+string option; //옵션 입력받는 스트링
 string mem_line, mem_station, mem_fee; //추천 데이터 검색 시 사용하는 스트링
+string s_temp;
 
 //데이터 출력 함수
 void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList*list_place_number, ArrayList* list_place_type, 
@@ -62,6 +64,17 @@ int main() {
     //계약 만기일
     const char* end_date = "data_end_date.txt";
 
+    //정렬 출력용 파일
+    const char* sorted_line = "data_line.txt";
+    const char* sorted_station = "data_station.txt";
+    const char* sorted_place_number = "data_place_number.txt";
+    const char* sorted_place_type = "data_place_type.txt";
+    const char* sorted_m2 = "data_m2.txt";
+    const char* sorted_fee = "data_fee.txt";
+    const char* sorted_work_type = "data_work_type.txt";
+    const char* sorted_end_date = "data_end_date.txt";
+
+
     //파일 읽어서 저장
     ArrayList* list_place_type = readFile(place_type);
     ArrayList* list_line = readFile(line);
@@ -72,12 +85,19 @@ int main() {
     ArrayList* list_work_type = readFile(work_type);
     ArrayList* list_end_date = readFile(end_date);
 
+    //인덱스 순서를 바꾸기 위해 사용하는 별도의 리스트
+    ArrayList* sorted_list_fee = readFile(sorted_fee);
+
     //하나라도 정상 로드가 되지 않을 경우 종료
     if (list_place_type -> size != list_line -> size && list_place_type -> size != list_station -> size) {
         printf("|출력| 파일 불러오기를 할 수 없습니다.\n"); return 1; 
     }
     //모두 로드되면 프로그램 준비
     else printf("|출력| 파일 불러오기를 성공하였습니다.\n");
+
+    //나중에 인덱스 순서 교환을 위해 인덱스를 1부터 끝 인덱스까지 저장한다.
+    for (int i = 0; i < list_place_type->size; i++)
+        mem_index[i] = i;
 
     while(1) {
         is_escape = false;
@@ -148,7 +168,7 @@ int main() {
 
             cout << "|출력| 어떤 역을 검색 하시겠습니까?" << endl;
             cout << "===============검색어 입력===============" << endl;
-            cout << "(예: '동대문', '천호' 또는 '1', '2') >> ";
+            cout << "(예: '길음', '혜화'| 환승역의 경우 '천호(8)','잠실(2)') >> ";
             cin >> cmd;
 
             //일단 검색
@@ -200,7 +220,7 @@ int main() {
 
 
         case 5: //cmd = 5  임대료 기준 검색
-            system("CLS");  search = false; is_number = true;
+            system("CLS");  search = false; is_number = true; end_for = false;
 
             cout << "|출력| 임대료 상한선을 입력해주세요." << endl;
             cout << "===============검색어 입력===============" << endl;
@@ -212,18 +232,108 @@ int main() {
                 if (isdigit(cmd[i]) == 0) is_number = false;
             }
 
+
             if (is_number == true) {
-                cout << endl;
-                printBorder();
-                for (int i = 0; i < list_place_type->size; i++) {
-                    if (atoi(list_fee->lines[i]) < atoi(cmd.c_str()) && atoi(list_fee->lines[i]) > 0) {
-                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
-                        search = true; //검색결과가 나오면 true
+                for (;;) {
+                    if (end_for == true) break;
+                    cout << "===============검색 옵션===============" << endl;
+                    cout << "1: 가격 높은 순" << endl;
+                    cout << "2: 가격 낮은 순" << endl;
+                    cout << "3: 옵션 선택 안 함" << endl;
+                    cout << "=======================================" << endl;
+                    cin >> option;
+                    
+                    switch(atoi(option.c_str())) {
+                    case 1: //내림차순
+                        print_option = down; end_for = true;
+                        break;
+
+                    case 2: //오름차순
+                        print_option = up; end_for = true; 
+                        break;
+
+                    case 3: //선택 안 함
+                        print_option = none;  end_for = true;
+                        break;
+
+                    default:
+                        system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
+                        break;
                     }
                 }
+
+                //system("CLS");
+                cout << endl;
+                printBorder();
+                
+                switch (print_option) {
+                case none:
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_fee->lines[i]) < atoi(cmd.c_str()) && atoi(list_fee->lines[i]) > 0) {
+                            printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                            search = true; //검색결과가 나오면 true
+                        }
+                    }
+                    break;
+
+                case up: //오름차순
+                    if (is_upsorted == false) { //한 번 오름차순 되면 다음 오름차순 출력 시에는 정렬 진행하지 않음
+                        for (int i = 0; i < sorted_list_fee->size - 1; i++) {
+                            int min_idx = i;
+                            for (int j = i + 1; j < sorted_list_fee->size; ++j) {
+                                if (atoi(sorted_list_fee->lines[j]) < atoi(sorted_list_fee->lines[min_idx]))
+                                    min_idx = j;
+                            }
+                            // 값을 교환하는 대신 인덱스 순서를 교환
+                            //sorted_list_fee를 기준으로 인덱스 순서를 교환하기 때문에 sorted_list_fee를 같이 정렬하지 않으면 인덱스가 제대로 정렬이 되지 않음
+                            std::swap(sorted_list_fee->lines[i], sorted_list_fee->lines[min_idx]);
+                            std::swap(mem_index[i], mem_index[min_idx]);
+                        }
+                        is_upsorted = true;
+                        is_downsorted = false;
+                    }
+
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {
+                            printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                            //cout << mem_index[i] << endl;
+                            search = true; //검색결과가 나오면 true
+                       }
+                    }
+                    break;
+
+
+                case down: //내림차순
+                    if (is_downsorted == false) { //내림차순도 마찬가지로 중복해서 내림차순 정렬을 진행하지 않는다.
+                        for (int i = 0; i < sorted_list_fee->size - 1; i++) {
+                            int max_idx = i;
+                            for (int j = i + 1; j < sorted_list_fee->size; ++j) {
+                                if (atoi(sorted_list_fee->lines[j]) > atoi(sorted_list_fee->lines[max_idx]))
+                                    max_idx = j;
+                            }
+                            // 값을 교환하는 대신 인덱스 순서를 교환
+                            std::swap(sorted_list_fee->lines[i], sorted_list_fee->lines[max_idx]);
+                            std::swap(mem_index[i], mem_index[max_idx]);
+                        }
+                        is_downsorted = true;
+                        is_upsorted = false;
+                    }
+
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_fee->lines[mem_index[i]]) > 0 && atoi(list_fee->lines[mem_index[i]]) < atoi(cmd.c_str())) {
+                            printData(mem_index[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date);
+                            search = true; //검색결과가 나오면 true
+                        }
+                    }
+                    break;
+                }
+                
                 if (search == true) {
                     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                    printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 임대료" << endl;
+                    printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 임대료| 상한선: " << cmd << "￦| "; 
+                    if (is_upsorted == true) cout << "옵션: 낮은 가격 순" << endl;
+                    else if (is_downsorted == true) cout << "옵션: 높은 가격 순" << endl;
+                    else cout << "옵션: 선택 안 함" << endl;
                 }
                 else if (search == false) {
                     system("CLS"); cout << "|출력| 해당 상한선 내의 임대료 데이터를 찾을 수 없습니다." << endl;
@@ -234,8 +344,7 @@ int main() {
             }
             break;
 
-
-        case 6: //cmd = 6  추천 데이터 검색
+        case 6: //cmd = 7  추천 데이터 검색
             system("CLS"); 
             is_number = true; is_escape = false;
            
@@ -286,7 +395,7 @@ int main() {
                         }
                         if (is_number == true) break;
                         if (is_number == false) {
-                            system("CLS"); cout << "올바르지 않은 검색어 입니다." << endl;
+                            system("CLS"); cout << "|출력| 올바르지 않은 검색어 입니다." << endl;
                             is_number = true;
                         }
                     }
@@ -309,16 +418,16 @@ int main() {
                         cin >> cmd;
 
                         switch (atoi(cmd.c_str())) {
-                        case 3:
-                            system("CLS"); is_escape = true; end_for = true; current_state = input;
+                        case 1:
+                            system("CLS");  current_state = output; end_for = true;
                             break;
 
                         case 2:
                             system("CLS");  current_state = input; end_for = true;
                             break;
 
-                        case 1:
-                            system("CLS");  current_state = output; end_for = true;
+                        case 3:
+                            system("CLS"); is_escape = true; end_for = true; current_state = input;
                             break;
 
                         default:
@@ -342,7 +451,7 @@ int main() {
 
                     if (search == true) {
                         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                        printBorder();  cout << endl << "|출력| 데이터를 기반으로 추천드리는 데이터는 위와 같습니다." << endl;
+                        printBorder();  cout << endl << "|출력| 데이터를 기반으로 추천드리는 상가는 위와 같습니다." << endl;
 
                         current_state = input; is_escape = true; break;
                     }
@@ -359,16 +468,16 @@ int main() {
                             cin >> cmd;
 
                             switch (atoi(cmd.c_str())) {
-                            case 2:
-                                system("CLS"); current_state = input; mem_line = ""; mem_station = ""; mem_fee = ""; is_escape = true; end_for = true;
-                                break;
-
                             case 1:
                                 system("CLS"); current_state = input; end_for = true;
                                 break;
 
+                            case 2:
+                                system("CLS"); current_state = input; mem_line = ""; mem_station = ""; mem_fee = ""; is_escape = true; end_for = true;
+                                break;
+
                             default:
-                                system("CLS"); cout << "알 수 없는 명령어 입니다." << endl;
+                                system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
                                 break;
                             }
                         }
