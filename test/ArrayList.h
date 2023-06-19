@@ -24,7 +24,7 @@ static bool end_for = false; //true면 for(;;)문 빠져나옴
 static int print_option = none; //출력 옵션, option_set 열거형에 따라 출력 형태가 달라짐
 static int mem_index[3000] = { 0 }; //인덱스 순서를 저장하는 배열, 데이터 위치 교환 없이 인덱스 순서만 교환함
  
-static bool is_upsorted = false;
+static bool is_upsorted = false; //오름차순, 내림차순 정렬 여부
 static bool is_downsorted = false;
 
 
