@@ -151,15 +151,7 @@ int main() {
     const char* end_date = "data_end_date.txt";
 
     //정렬 출력용 파일
-    const char* sorted_line = "data_line.txt";
-    const char* sorted_station = "data_station.txt";
-    const char* sorted_place_number = "data_place_number.txt";
-    const char* sorted_place_type = "data_place_type.txt";
-    const char* sorted_m2 = "data_m2.txt";
     const char* sorted_fee = "data_fee.txt";
-    const char* sorted_work_type = "data_work_type.txt";
-    const char* sorted_end_date = "data_end_date.txt";
-
 
     //파일 읽어서 저장
     ArrayList* list_place_type = readFile(place_type);
