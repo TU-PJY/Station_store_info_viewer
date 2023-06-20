@@ -226,7 +226,7 @@ int main() {
 
         case 2: //cmd = 2  노선 기준 검색
             //검색 전 초기 상태
-            system("CLS"); search = false; is_number = true;
+            system("CLS"); search = false; is_number = true; end_for = false;
             color_out = false; //같은 노선의 데이터만 나오므로 색상 비활성화
             cout << "|출력| 어떤 노선을 검색 하시겠습니까?" << endl;
             cout << "===============검색어 입력===============" << endl;
@@ -238,28 +238,165 @@ int main() {
                 if (isdigit(cmd[i]) == 0) is_number = false;
             }
 
-            //만약 올바른 검색어라면 출력 시작
+            //만약 올바른 검색어라면 옵션 입력 후 출력 시작
             if (is_number == true) {
-                cout << endl;
-                printBorder();
-                for (int i = 0; i < list_place_type->size; i++) {
-                    if (strstr(list_line->lines[i], cmd.c_str())) {
-                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
-                        search = true;
+                system("CLS");
+                for (;;) {
+                    if (end_for == true) break;
+                    cout << "===============검색 옵션===============" << endl;
+                    cout << "1: 임대료 표시된 데이터만 검색" << endl;
+                    cout << "2: 면적 표시된 데이터만 검색" << endl;
+                    cout << "3: 면적 낮은 순(2번 옵션 자동 활성화)" << endl;
+                    cout << "4: 면적 높은 순(2번 옵션 자동 활성화)" << endl;
+                    cout << "5: 낮은 가격 순(1번 옵션 자동 활성화)" << endl;
+                    cout << "6: 높은 가격 순(1번 옵션 자동 활성화)" << endl;
+                    cout << "7: 옵션 선택 안 함" << endl;
+                    cout << "=======================================" << endl;
+                    cout << "옵션 >> ";
+                    cin >> option;
+
+                    switch (atoi(option.c_str())) {
+                    case 1: //임대료 표시된 데이터만 검색
+                        print_option = without0; end_for = true;
+                        break;
+
+                    case 2: //면적 표시된 데이터만 검색
+                        print_option = without0_width; end_for = true;
+                        break;
+
+                    case 3: //면적 오름차순
+                        print_option = up_width; end_for = true;
+                        break;
+
+                    case 4: //면적 내림차순
+                        print_option = down_width; end_for = true;
+                        break;
+
+                    case 5: //임대료 오름차순
+                        print_option = up_price; end_for = true;
+                        break;
+
+                    case 6: //임대료 내림차순
+                        print_option = down_price; end_for = true;
+                        break;
+
+                    case 7: //선택 안 함
+                        print_option = none_set;  end_for = true;
+                        break;
+
+                    default:
+                        system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
+                        break;
                     }
                 }
-                if (search == true) {
-                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                    printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 노선 번호" << endl;
+
+
+                system("CLS"); printBorder();
+
+                switch (print_option) {
+                case none_set: //옵션 없음
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_line->lines[i]) == atoi(cmd.c_str()))
+                            printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
+
+
+                case up_width: //면적 오름차순
+                    start = clock();
+                    mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, up_width);
+                    finish = clock();
+                    is_upsorted = true;
+                    is_downsorted = false;
+
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && atoi(list_line->lines[mem_index_m2[i]]) == atoi(cmd.c_str()))
+                            printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
+
+
+                case down_width: //면적 내림차순
+                    start = clock();
+                    mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, down_width);
+                    finish = clock();
+                    is_upsorted = true;
+                    is_downsorted = false;
+
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && atoi(list_line->lines[mem_index_m2[i]]) == atoi(cmd.c_str()))
+                            printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
+
+
+                case up_price: //임대료 오름차순
+                    //데이터 위치 교환 없이 인덱스 순서만 교환함
+                    //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                    start = clock();
+                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, up_price);
+                    finish = clock();
+                    is_upsorted = true;
+                    is_downsorted = false;
+
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && atoi(list_line->lines[mem_index_fee[i]]) == atoi(cmd.c_str()))
+                            printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
+
+
+                case down_price: //임대료 내림차순
+                    start = clock();
+                    mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, down_price);
+                    finish = clock();
+                    is_downsorted = true;
+                    is_upsorted = false;
+
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && atoi(list_line->lines[mem_index_fee[i]]) == atoi(cmd.c_str()))
+                            printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
+
+
+                case without0: //임대료 표시 안 된 데이터 제외
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atoi(list_fee->lines[i]) > 0 && atoi(list_line->lines[i]) == atoi(cmd.c_str()))
+                            printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
+
+
+                case without0_width: //면적 표시 안 된 데이터 제외
+                    for (int i = 0; i < list_place_type->size; i++) {
+                        if (atof(list_m2->lines[i]) > 0 && atoi(list_line->lines[i]) == atoi(cmd.c_str()))
+                            printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                    }
+                    break;
                 }
-                else if (search == false) {
-                    system("CLS"); cout << "|출력| 그런 데이터가 없습니다." << endl;
+
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다. 검색 옵션: ";
+                if (print_option == without0) cout << "임대료 표시된 데이터만" << endl;
+                else if (print_option == without0_width) cout << "면적 표시된 데이터만";
+                else if (print_option == up_width) cout << "면적 낮은 순";
+                else if (print_option == down_width) cout << "면적 높은 순";
+                else if (print_option == up_price) cout << "낮은 가격 순";
+                else if (print_option == down_price) cout << "높은 가격 순";
+                else if (print_option == none_set) cout << "선택 안 함";
+                cout << "| " << "검색 노선: " << cmd << "호선" << endl;
+
+                if (print_option != without0 && print_option != without0_width) {
+                    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+                    cout << "|처리 시간| " << duration << "ms" << endl;
                 }
-            }
-            else if (is_number == false) {
-                system("CLS"); cout << "|출력| 올바른 숫자가 아닙니다." << endl;
             }
             
+           else if (is_number == false) {
+               system("CLS"); cout << "|출력| 올바른 검색어가 아닙니다." << endl;
+           }
+
             color_out = true;
             break;
 
@@ -273,18 +410,159 @@ int main() {
             cout << "(예: '길음', '혜화'| 환승역의 경우 '천호(8)','잠실(2)') >> ";
             cin >> cmd;
 
-            //일단 검색
-            cout << endl;
-            printBorder();
-            for (int i = 0; i < list_place_type->size; i++) {
-                if (strstr(list_station->lines[i], cmd.c_str())) {
-                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
-                    search = true; //검색결과가 나오면 true
+            system("CLS");
+            for (;;) {
+                if (end_for == true) break;
+                cout << "===============검색 옵션===============" << endl;
+                cout << "1: 임대료 표시된 데이터만 검색" << endl;
+                cout << "2: 면적 표시된 데이터만 검색" << endl;
+                cout << "3: 면적 낮은 순(2번 옵션 자동 활성화)" << endl;
+                cout << "4: 면적 높은 순(2번 옵션 자동 활성화)" << endl;
+                cout << "5: 낮은 가격 순(1번 옵션 자동 활성화)" << endl;
+                cout << "6: 높은 가격 순(1번 옵션 자동 활성화)" << endl;
+                cout << "7: 옵션 선택 안 함" << endl;
+                cout << "=======================================" << endl;
+                cout << "옵션 >> ";
+                cin >> option;
+
+                switch (atoi(option.c_str())) {
+                case 1: //임대료 표시된 데이터만 검색
+                    print_option = without0; end_for = true;
+                    break;
+
+                case 2: //면적 표시된 데이터만 검색
+                    print_option = without0_width; end_for = true;
+                    break;
+
+                case 3: //면적 오름차순
+                    print_option = up_width; end_for = true;
+                    break;
+
+                case 4: //면적 내림차순
+                    print_option = down_width; end_for = true;
+                    break;
+
+                case 5: //임대료 오름차순
+                    print_option = up_price; end_for = true;
+                    break;
+
+                case 6: //임대료 내림차순
+                    print_option = down_price; end_for = true;
+                    break;
+
+                case 7: //선택 안 함
+                    print_option = none_set;  end_for = true;
+                    break;
+
+                default:
+                    system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
+                    break;
                 }
             }
+
+
+            system("CLS"); printBorder();
+
+            switch (print_option) {
+            case none_set: //옵션 없음
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (strstr(list_station->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case up_width: //면적 오름차순
+                start = clock();
+                mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, up_width);
+                finish = clock();
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && strstr(list_station->lines[mem_index_m2[i]], cmd.c_str())) {
+                        printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case down_width: //면적 내림차순
+                start = clock();
+                mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, down_width);
+                finish = clock();
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && strstr(list_station->lines[mem_index_m2[i]], cmd.c_str())) {
+                        printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case up_price: //임대료 오름차순
+                //데이터 위치 교환 없이 인덱스 순서만 교환함
+                //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                start = clock();
+                mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, up_price);
+                finish = clock();
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && strstr(list_station->lines[mem_index_fee[i]], cmd.c_str())) {
+                        printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case down_price: //임대료 내림차순
+                start = clock();
+                mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, down_price);
+                finish = clock();
+                is_downsorted = true;
+                is_upsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && strstr(list_station->lines[mem_index_fee[i]], cmd.c_str())) {
+                        printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case without0: //임대료 표시 안 된 데이터 제외
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[i]) > 0 && strstr(list_station->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case without0_width: //면적 표시 안 된 데이터 제외
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[i]) > 0 && strstr(list_station->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+            }
+
             if (search == true) {
                 SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 역명" << endl;
+                printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 역명| 검색어: " << cmd << endl;
             }
             //검색결과가 나오지 않으면 그대로 false
             else if (search == false) {
@@ -295,24 +573,180 @@ int main() {
 
         case 4:  //cmd = 4  업종 기준 검색
             //검색 전 초기 상태
-            system("CLS");  search = false;
+            system("CLS");  search = false; end_for = false;
 
             cout << "|출력| 어떤 업종을 검색 하시겠습니까?" << endl;
             cout << "===============검색어 입력===============" << endl;
             cout << "(예: '플라워', '화장품', '화', '무인' 등) >> ";
             cin >> cmd;
 
-            cout << endl;
-            printBorder();
-            for (int i = 0; i < list_place_type->size; i++) {
-                if (strstr(list_work_type->lines[i], cmd.c_str())) {
-                    printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
-                    search = true; //검색결과가 나오면 true
+            system("CLS");
+            for (;;) {
+                if (end_for == true) break;
+                cout << "===============검색 옵션===============" << endl;
+                cout << "1: 임대료 표시된 데이터만 검색" << endl;
+                cout << "2: 면적 표시된 데이터만 검색" << endl;
+                cout << "3: 면적 낮은 순(2번 옵션 자동 활성화)" << endl;
+                cout << "4: 면적 높은 순(2번 옵션 자동 활성화)" << endl;
+                cout << "5: 낮은 가격 순(1번 옵션 자동 활성화)" << endl;
+                cout << "6: 높은 가격 순(1번 옵션 자동 활성화)" << endl;
+                cout << "7: 옵션 선택 안 함" << endl;
+                cout << "=======================================" << endl;
+                cout << "옵션 >> ";
+                cin >> option;
+
+                switch (atoi(option.c_str())) {
+                case 1: //임대료 표시된 데이터만 검색
+                    print_option = without0; end_for = true;
+                    break;
+
+                case 2: //면적 표시된 데이터만 검색
+                    print_option = without0_width; end_for = true;
+                    break;
+
+                case 3: //면적 오름차순
+                    print_option = up_width; end_for = true;
+                    break;
+
+                case 4: //면적 내림차순
+                    print_option = down_width; end_for = true;
+                    break;
+
+                case 5: //임대료 오름차순
+                    print_option = up_price; end_for = true;
+                    break;
+
+                case 6: //임대료 내림차순
+                    print_option = down_price; end_for = true;
+                    break;
+
+                case 7: //선택 안 함
+                    print_option = none_set;  end_for = true;
+                    break;
+
+                default:
+                    system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
+                    break;
                 }
             }
+
+
+            system("CLS"); printBorder();
+
+            switch (print_option) {
+            case none_set: //옵션 없음
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (strstr(list_work_type->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case up_width: //면적 오름차순
+                start = clock();
+                mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, up_width);
+                finish = clock();
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && strstr(list_work_type->lines[mem_index_m2[i]], cmd.c_str())) {
+                        printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case down_width: //면적 내림차순
+                start = clock();
+                mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, down_width);
+                finish = clock();
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && strstr(list_work_type->lines[mem_index_m2[i]], cmd.c_str())) {
+                        printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case up_price: //임대료 오름차순
+                //데이터 위치 교환 없이 인덱스 순서만 교환함
+                //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                start = clock();
+                mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, up_price);
+                finish = clock();
+                is_upsorted = true;
+                is_downsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && strstr(list_work_type->lines[mem_index_fee[i]], cmd.c_str())) {
+                        printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case down_price: //임대료 내림차순
+                start = clock();
+                mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, down_price);
+                finish = clock();
+                is_downsorted = true;
+                is_upsorted = false;
+
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && strstr(list_work_type->lines[mem_index_fee[i]], cmd.c_str())) {
+                        printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case without0: //임대료 표시 안 된 데이터 제외
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atoi(list_fee->lines[i]) > 0 && strstr(list_work_type->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+
+
+            case without0_width: //면적 표시 안 된 데이터 제외
+                for (int i = 0; i < list_place_type->size; i++) {
+                    if (atof(list_m2->lines[i]) > 0 && strstr(list_work_type->lines[i], cmd.c_str())) {
+                        printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                        search = true;
+                    }
+                }
+                break;
+            }
+
+            
             if (search == true) {
                 SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                printBorder(); cout << endl << "|출력| 검색한 데이터를 모두 출력하였습니다. 검색 기준: 업종" << endl;
+                printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다. 검색 옵션: ";
+                if (print_option == without0) cout << "임대료 표시된 데이터만" << endl;
+                else if (print_option == without0_width) cout << "면적 표시된 데이터만" << endl;
+                else if (print_option == up_width) cout << "면적 낮은 순" << endl;
+                else if (print_option == down_width) cout << "면적 높은 순" << endl;
+                else if (print_option == up_price) cout << "낮은 가격 순" << endl;
+                else if (print_option == down_price) cout << "높은 가격 순" << endl;
+                else if (print_option == none_set) cout << "선택 안 함" << endl;
+                cout << "| " << "검색어: " << cmd << endl;
+
+                if (print_option != without0 && print_option != without0_width) {
+                    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+                    cout << "|처리 시간| " << duration << "ms" << endl;
+                }
             }
             //검색결과가 나오지 않으면 그대로 false
             else if (search == false) {
@@ -365,10 +799,7 @@ int main() {
                     }
                 }
 
-                //system("CLS");
-                cout << endl;
-                printBorder();
-                
+                system("CLS"); printBorder(); 
                 switch (print_option) {
                 case none:
                     for (int i = 0; i < list_place_type->size; i++) {
@@ -443,49 +874,6 @@ int main() {
                 
                 switch (current_state) {
                 case input:
-                    if (line_op == true) {
-                        for (;;) {
-                            cout << "|출력| 노선을 입력해 주세요." << endl;
-                            cout << "===============필터 입력===============" << endl;
-                            cout << "(예: '1', '2', '3') >> ";
-
-                            cin >> mem_line;
-
-                            for (int i = 0; i < mem_line.length(); i++) {
-                                if (isdigit(mem_line[i]) == 0) is_number = false;
-                            }
-                            if (is_number == true) {
-                                line_op = false;
-                                break;
-                            }
-                            else if (is_number == false) {
-                                system("CLS"); cout << "|출력| 올바르지 않은 검색어입니다." << endl;
-                                is_number = true;
-                            }
-                        }
-                    }
-
-                    system("CLS");
-
-                    if (station_op == true) {
-                        for (;;) {
-                            cout << "|출력| 역명을 입력해 주세요." << endl;
-                            cout << "===============필터 입력===============" << endl;
-                            cout << "(예: '동대문', '천호' 또는 '1', '2') >> ";
-
-                            cin >> mem_station;
-                            station_op = false;
-                            break;
-                        }
-                    }
-
-                    system("CLS");
-
-                    for (;;) {
-
-                    }
-
-                    
                    for (;;) {
                         cout << "|출력| 노선을 입력해 주세요." << endl;
                         cout << "===============필터 입력===============" << endl;
@@ -550,7 +938,7 @@ int main() {
 
                         switch (atoi(cmd.c_str())) {
                         case 1:
-                            system("CLS");  current_state = output; end_for = true;
+                            system("CLS"); current_state = output; end_for = true;
                             break;
 
                         case 2:
@@ -566,25 +954,189 @@ int main() {
                             break;
                         }
                     }
+                    if (end_for == true && current_state == input) break;
+
+                    system("CLS"); end_for = false;
+                    for (;;) {
+                        if (end_for == true) {
+                            break;
+                        }
+                        cout << "===============검색 옵션===============" << endl;
+                        cout << "1: 임대료 표시된 데이터만 검색" << endl;
+                        cout << "2: 면적 표시된 데이터만 검색" << endl;
+                        cout << "3: 면적 낮은 순(2번 옵션 자동 활성화)" << endl;
+                        cout << "4: 면적 높은 순(2번 옵션 자동 활성화)" << endl;
+                        cout << "5: 낮은 가격 순(1번 옵션 자동 활성화)" << endl;
+                        cout << "6: 높은 가격 순(1번 옵션 자동 활성화)" << endl;
+                        cout << "7: 옵션 선택 안 함" << endl;
+                        cout << "=======================================" << endl;
+                        cout << "옵션 >> ";
+                        cin >> option;
+
+                        switch (atoi(option.c_str())) {
+                        case 1: //임대료 표시된 데이터만 검색
+                            print_option = without0; end_for = true;
+                            break;
+
+                        case 2: //면적 표시된 데이터만 검색
+                            print_option = without0_width; end_for = true;
+                            break;
+
+                        case 3: //면적 오름차순
+                            print_option = up_width; end_for = true;
+                            break;
+
+                        case 4: //면적 내림차순
+                            print_option = down_width; end_for = true;
+                            break;
+
+                        case 5: //임대료 오름차순
+                            print_option = up_price; end_for = true;
+                            break;
+
+                        case 6: //임대료 내림차순
+                            print_option = down_price; end_for = true;
+                            break;
+
+                        case 7: //선택 안 함
+                            print_option = none_set;  end_for = true;
+                            break;
+
+                        default:
+                            system("CLS"); cout << "|출력| 알 수 없는 명령어 입니다." << endl;
+                            break;
+                        }
+                    }
+
                     break;
 
 
                 case output: //출력 단계
                     search = false; end_for = false;
-                    printBorder();
-                    for (int i = 0; i < list_place_type->size; i++) {
-                        if (strstr(list_line->lines[i], mem_line.c_str()) && strstr(list_station->lines[i], mem_station.c_str()) &&
-                            atoi(list_fee->lines[i]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[i]) > 0) {
-                            printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
-                            search = true; //검색결과가 나오면 true
+                    system("CLS"); printBorder();
+
+                    switch (print_option) {
+                    case none_set: //옵션 없음
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (strstr(list_line->lines[i], mem_line.c_str()) && strstr(list_station->lines[i], mem_station.c_str()) &&
+                                atoi(list_fee->lines[i]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[i]) > 0) {
+                                printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
                         }
+                        break;
+
+
+                    case up_width: //면적 오름차순
+                        start = clock();
+                        mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, up_width);
+                        finish = clock();
+                        is_upsorted = true;
+                        is_downsorted = false;
+
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && strstr(list_line->lines[mem_index_m2[i]], mem_line.c_str()) && strstr(list_station->lines[mem_index_m2[i]], mem_station.c_str()) &&
+                                atoi(list_fee->lines[mem_index_m2[i]]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[mem_index_m2[i]]) > 0) {
+                                printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
+                        }
+                        break;
+
+
+                    case down_width: //면적 내림차순
+                        start = clock();
+                        mergeSort(sorted_list_m2->lines, 0, sorted_list_m2->size - 1, mem_index_m2, 0, sorted_list_m2->size - 1, down_width);
+                        finish = clock();
+                        is_upsorted = true;
+                        is_downsorted = false;
+
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (atof(list_m2->lines[mem_index_m2[i]]) > 0 && strstr(list_line->lines[mem_index_m2[i]], mem_line.c_str()) && strstr(list_station->lines[mem_index_m2[i]], mem_station.c_str()) &&
+                                atoi(list_fee->lines[mem_index_m2[i]]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[mem_index_m2[i]]) > 0) {
+                                printData(mem_index_m2[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
+                        }
+                        break;
+
+
+                    case up_price: //임대료 오름차순
+                        //데이터 위치 교환 없이 인덱스 순서만 교환함
+                        //단, 인덱스 순서 교환을 위해 별도의 리스트를 같이 정렬해야함. 안그러면 인덱스 순서가 제대로 교환이 안됨
+                        start = clock();
+                        mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, up_price);
+                        finish = clock();
+                        is_upsorted = true;
+                        is_downsorted = false;
+
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && strstr(list_line->lines[mem_index_fee[i]], mem_line.c_str()) && strstr(list_station->lines[mem_index_fee[i]], mem_station.c_str()) &&
+                                atoi(list_fee->lines[mem_index_fee[i]]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[mem_index_fee[i]]) > 0) {
+                                printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
+                        }
+                        break;
+
+
+                    case down_price: //임대료 내림차순
+                        start = clock();
+                        mergeSort(sorted_list_fee->lines, 0, sorted_list_fee->size - 1, mem_index_fee, 0, sorted_list_fee->size - 1, down_price);
+                        finish = clock();
+                        is_downsorted = true;
+                        is_upsorted = false;
+
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (atoi(list_fee->lines[mem_index_fee[i]]) > 0 && strstr(list_line->lines[mem_index_fee[i]], mem_line.c_str()) && strstr(list_station->lines[mem_index_fee[i]], mem_station.c_str()) &&
+                                atoi(list_fee->lines[mem_index_fee[i]]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[mem_index_fee[i]]) > 0) {
+                                printData(mem_index_fee[i], list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
+                        }
+                        break;
+
+
+                    case without0: //임대료 표시 안 된 데이터 제외
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (atoi(list_fee->lines[i]) > 0 && strstr(list_line->lines[i], mem_line.c_str()) && strstr(list_station->lines[i], mem_station.c_str()) &&
+                                atoi(list_fee->lines[i]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[i]) > 0) {
+                                printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
+                        }
+                        break;
+
+
+                    case without0_width: //면적 표시 안 된 데이터 제외
+                        for (int i = 0; i < list_place_type->size; i++) {
+                            if (atof(list_m2->lines[i]) > 0 && strstr(list_line->lines[i], mem_line.c_str()) && strstr(list_station->lines[i], mem_station.c_str()) &&
+                                atoi(list_fee->lines[i]) < atoi(mem_fee.c_str()) && atoi(list_fee->lines[i]) > 0) {
+                                printData(i, list_line, list_station, list_place_number, list_place_type, list_work_type, list_m2, list_fee, list_end_date, color_out);
+                                search = true;
+                            }
+                        }
+                        break;
                     }
+
 
                     if (search == true) {
                         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-                        printBorder();  cout << endl << "|출력| 데이터를 기반으로 추천드리는 상가는 위와 같습니다." << endl;
+                        printBorder(); cout << endl << "|출력| 데이터를 모두 출력하였습니다. 검색 옵션: ";
+                        if (print_option == without0) cout << "임대료 표시된 데이터만" << endl;
+                        else if (print_option == without0_width) cout << "면적 표시된 데이터만" << endl;
+                        else if (print_option == up_width) cout << "면적 낮은 순" << endl;
+                        else if (print_option == down_width) cout << "면적 높은 순" << endl;
+                        else if (print_option == up_price) cout << "낮은 가격 순" << endl;
+                        else if (print_option == down_price) cout << "높은 가격 순" << endl;
+                        else if (print_option == none_set) cout << "선택 안 함" << endl;
                         cout << "|검색 필터| 노선: " << mem_line << "호선 | " << "역명: " << mem_station << " | " << "임대료 상한선: " << mem_fee << "￦" << endl;
 
+                        if (print_option != without0 && print_option != without0_width) {
+                            duration = (double)(finish - start) / CLOCKS_PER_SEC;
+                            cout << "|처리 시간| " << duration << "ms" << endl;
+                        }
+                        
                         current_state = input; is_escape = true; break;
                     }
 

@@ -168,6 +168,7 @@ void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList* 
     cout.width(10); cout << list_place_number->lines[i] << "| ";
     cout.width(15); cout << list_place_type->lines[i] << "| ";
 
+    //없는 데이터일경우 N/A 표시
     if (strlen(list_work_type->lines[i]) > 0) {
         cout.width(10); cout << list_work_type->lines[i] << "| ";
     }
