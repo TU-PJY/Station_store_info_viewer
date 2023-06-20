@@ -140,6 +140,8 @@ void mergeSort(char* arr[], int l, int r, int index[], int index_l, int index_r,
 //데이터 출력 함수
 void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList* list_place_number, ArrayList* list_place_type,
     ArrayList* list_work_type, ArrayList* list_m2, ArrayList* list_fee, ArrayList* list_end_date, bool color_out) {
+    string na = "N/A"; //줄을 맞추기 위해 별도의 스트링 변수 사용
+
     //노선에 따라 색상이 다르게 출력
     if (color_out == true) { //color_out이 true일 때만 색상 출력
         if (strstr(list_line->lines[i], "1호선"))
@@ -165,10 +167,34 @@ void printData(int i, ArrayList* list_line, ArrayList* list_station, ArrayList* 
     cout.width(25); cout << list_station->lines[i] << "| ";
     cout.width(10); cout << list_place_number->lines[i] << "| ";
     cout.width(15); cout << list_place_type->lines[i] << "| ";
-    cout.width(10); cout << list_work_type->lines[i] << "| ";
-    cout.width(10); cout << list_m2->lines[i] << " m^2| ";
-    cout.width(10); cout << list_fee->lines[i] << " ￦| ";
-    cout.width(10); cout << list_end_date->lines[i] << " |";
+
+    if (strlen(list_work_type->lines[i]) > 0) {
+        cout.width(10); cout << list_work_type->lines[i] << "| ";
+    }
+    else if (strlen(list_work_type->lines[i]) == 0) {
+        cout.width(10); cout << na << "| ";
+    }
+
+    if (atof(list_m2->lines[i]) > 0) {
+        cout.width(10); cout << list_m2->lines[i] << " m^2| ";
+    }
+    else if (atof(list_m2->lines[i]) == 0) {
+        cout.width(10); cout << na << " m^2| ";
+    }
+
+    if (atoi(list_fee->lines[i]) > 0) {
+        cout.width(10); cout << list_fee->lines[i] << " ￦| ";
+    }
+    else if (atoi(list_fee->lines[i]) == 0) {
+        cout.width(10); cout << na << " ￦| ";
+    }
+
+    if (strlen(list_end_date->lines[i]) > 0) {
+        cout.width(10); cout << list_end_date->lines[i] << " |";
+    }
+    else if (strlen(list_end_date->lines[i]) == 0) {
+        cout.width(10); cout << na << " |";
+    }
     cout << endl;
 }
 
